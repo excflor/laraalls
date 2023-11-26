@@ -14,7 +14,10 @@ class StreamController extends Controller
     {
         try {
             // Get Token
-            $reqToken = Http::post("https://www.vidio.com/live/205/tokens");
+            $reqToken = Http::acceptJson()->withHeaders([
+                'Origin' => 'https://www.vidio.com',
+                'Referer' => 'https://www.vidio.com/live/205-indosiar',
+            ])->post("https://www.vidio.com/live/205/tokens");
             if ($reqToken->failed()) {
                 throw new \Exception("failed to get token");
             }
@@ -22,7 +25,10 @@ class StreamController extends Controller
             $tokenJson = $reqToken->json();
             $token = $tokenJson["token"];
 
-            $reqMaster = Http::get("https://etslive-app.vidio.com/live/205/master.m3u8?".$token);
+            $reqMaster = Http::acceptJson()->withHeaders([
+                'Origin' => 'https://www.vidio.com',
+                'Referer' => 'https://www.vidio.com/',
+            ])->get("https://etslive-app.vidio.com/live/205/master.m3u8?".$token);
 
             if ($reqMaster->failed()) {
                 throw new \Exception("failed to get master");
