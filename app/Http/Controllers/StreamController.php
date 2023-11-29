@@ -19,7 +19,7 @@ class StreamController extends Controller
                 'Referer' => 'https://www.vidio.com/live/205-indosiar',
             ])->post("https://www.vidio.com/live/205/tokens");
             if ($reqToken->failed()) {
-                throw new \Exception("failed to get token");
+                throw new \Exception("failed to get token with raw error" . $reqToken);
             }
 
             $tokenJson = $reqToken->json();
