@@ -56,22 +56,26 @@ class StreamController extends Controller
     public function loginCubmu() {
         try {
             $loginPayload = [
-                'url' => '/v2/auth/login',
-                'app_id' => 'cubmu',
-                'tvs_platform_id' => 'standalone',
-                'email' => 'andre.ndr31@gmail.com',
-                'password' => 'xxeHhVbmwxZFdwcGJrQXpNWHRUVUV4SlZGUkZVbjB4TnpBd05EZzJOVEF5',
+                [
+                    'url' => '/v2/auth/login',
+                ],
+                [
+                    'app_id' => 'cubmu',
+                    'tvs_platform_id' => 'standalone',
+                    'email' => 'andre.ndr31@gmail.com',
+                    'password' => 'xxeHhVbmwxZFdwcGJrQXpNWHRUVUV4SlZGUkZVbjB4TnpBd05EZzJOVEF5',
+                ]
             ];
         
             $loginResponse = Http::post('https://www.cubmu.com/api/hmac', $loginPayload);
+            $body = $loginResponse->json();
         
-            if ($loginResponse->json('data.statusCode') !== '200') {
+            if ($body['statusCode'] !== '200') {
                 throw new \Exception('error get access token');
             }
-        
-            $accessToken = $loginResponse->json('data.result.access_token');
-            $platformId = $loginResponse->json('data.result.platform_id');
-            $email = $loginResponse->json('data.result.email');
+
+            $platformId = $body['result']['platform_id'];
+            $email = $body['result']['email'];
         
             $params = [
                 'email' => $email,
@@ -82,12 +86,13 @@ class StreamController extends Controller
         
             $url = 'https://servicebuss.transvision.co.id/tvs/login/external?' . http_build_query($params);
             $transService = Http::post($url);
+            $transBody = $transService->json();
         
-            if (!$transService->json('data.access_token')) {
+            if (!$transBody['access_token']) {
                 throw new \Exception('error get session id');
             }
         
-            $sessionId = $transService->json('data.access_token');
+            $sessionId = $body['access_token'];
         
             return ['sessionId' => $sessionId, 'email' => $email];
         } catch (\Exception $error) {
