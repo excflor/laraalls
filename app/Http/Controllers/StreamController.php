@@ -14,12 +14,12 @@ class StreamController extends Controller
     {
         try {
             // Get Token
-            $reqToken = Http::acceptJson()->withHeaders([
+            $reqToken = Http::dd()->acceptJson()->withHeaders([
                 'Origin' => 'https://www.vidio.com',
                 'Referer' => 'https://www.vidio.com/live/205-indosiar',
             ])->post("https://www.vidio.com/live/205/tokens");
             if ($reqToken->failed()) {
-                throw new \Exception("failed to get token with raw error" . $reqToken);
+                throw new \Exception("failed to get token with raw error " . $reqToken);
             }
 
             $tokenJson = $reqToken->json();
