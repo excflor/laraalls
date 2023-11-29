@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/stream/vidio/indosiar', [StreamController::class, 'indosiar']);
+Route::get('/stream/cubmu/token', [StreamController::class,'getToken']);

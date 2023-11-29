@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class StreamController extends Controller
 {
@@ -52,51 +53,91 @@ class StreamController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+    public function loginCubmu() {
+        try {
+            $loginPayload = [
+                'url' => '/v2/auth/login',
+                'app_id' => 'cubmu',
+                'tvs_platform_id' => 'standalone',
+                'email' => 'andre.ndr31@gmail.com',
+                'password' => 'xxeHhVbmwxZFdwcGJrQXpNWHRUVUV4SlZGUkZVbjB4TnpBd05EZzJOVEF5',
+            ];
+        
+            $loginResponse = Http::post('https://www.cubmu.com/api/hmac', $loginPayload);
+        
+            if ($loginResponse->json('data.statusCode') !== '200') {
+                throw new \Exception('error get access token');
+            }
+        
+            $accessToken = $loginResponse->json('data.result.access_token');
+            $platformId = $loginResponse->json('data.result.platform_id');
+            $email = $loginResponse->json('data.result.email');
+        
+            $params = [
+                'email' => $email,
+                'password' => 'Unl1dWppbkAzMQ==',
+                'deviceId' => '1234567890',
+                'platformId' => $platformId,
+            ];
+        
+            $url = 'https://servicebuss.transvision.co.id/tvs/login/external?' . http_build_query($params);
+            $transService = Http::post($url);
+        
+            if (!$transService->json('data.access_token')) {
+                throw new \Exception('error get session id');
+            }
+        
+            $sessionId = $transService->json('data.access_token');
+        
+            return ['sessionId' => $sessionId, 'email' => $email];
+        } catch (\Exception $error) {
+            throw new \Exception($error->getMessage());
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+    public function encodeToken($req) {
+        try {
+            $payload = [
+                'userId' => $req['email'],
+                'sessionId' => $req['sessionId'],
+                'merchant' => 'giitd_transvision',
+            ];
+        
+            // Set the 'noTimestamp' option to true
+            $options = [
+                'noTimestamp' => true,
+            ];
+        
+            // Sign the payload and get the token
+            $token = JWTAuth::attempt($payload, $options);
+        
+            if (!$token) {
+                throw new \Exception('Error signing the token');
+            }
+        
+            // Split the token into its components
+            list($encodedHeader, $encodedPayload, $encodedSignature) = explode('.', $token);
+        
+            return $encodedPayload;
+        } catch (\Exception $error) {
+            throw new \Exception($error->getMessage());
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+    public function getToken() {
+        try {
+            $login = $this->loginCubmu();
+        
+            if (empty($login['email']) || empty($login['sessionId'])) {
+                throw new \Exception('Login failed');
+            }
+        
+            $encodedToken = $this->encodeToken($login);
+            $token = $encodedToken ?? '';
+        
+            return $token;
+        } catch (\Exception $error) {
+            throw new \Exception($error->getMessage());
+        }
     }
 }
