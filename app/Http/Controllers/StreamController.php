@@ -14,7 +14,7 @@ class StreamController extends Controller
     {
         try {
             // Get Token
-            $reqToken = Http::dd()->acceptJson()->withHeaders([
+            $reqToken = Http::acceptJson()->withHeaders([
                 'Origin' => 'https://www.vidio.com',
                 'Referer' => 'https://www.vidio.com/live/205-indosiar',
             ])->post("https://www.vidio.com/live/205/tokens");
