@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -163,7 +164,29 @@ class StreamController extends Controller
         
             return response($token)->header('Content-Type', 'application/json');
         } catch (\Exception $error) {
-            dd($error);
+            throw new \Exception($error->getMessage());
+        }
+    }
+
+    public function getLicenseDRMToday(Request $request) {
+        try {
+            $payload = $request->getContent();
+            $getToken = $this->getToken();
+            $token = $getToken->getContent();
+
+            $params = [
+                'url' => 'https://lic.drmtoday.com/license-proxy-widevine/cenc/'
+            ];
+            $http = Http::withHeaders([
+                'dt-custom-data' => $token,
+            ])->withQueryParameters([
+                'specConform' => 'true',
+            ])->withBody($payload)->post($params['url']);
+
+            $responseBody = $http->getBody();
+
+            return response($responseBody, 200)->header('Content-Type', 'text/plain');
+        } catch (\Exception $error) {
             throw new \Exception($error->getMessage());
         }
     }
