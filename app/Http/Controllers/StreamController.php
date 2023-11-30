@@ -136,7 +136,7 @@ class StreamController extends Controller
         
             $redisBody = json_encode($encodedPayload);
             $expire = 86400; // 1 Day
-            Redis::set('cubmu', $redisBody, 'EX', $expire);
+            // Redis::set('cubmu', $redisBody, 'EX', $expire);
 
             return $encodedPayload;
         } catch (\Exception $error) {
@@ -146,10 +146,10 @@ class StreamController extends Controller
 
     public function getToken() {
         try {
-            $cubmu = Redis::get('cubmu');
-            if (!empty($cubmu)) {
-                $cubmuToken = json_decode($cubmu, true);
-            } else {
+            // $cubmu = Redis::get('cubmu');
+            // if (!empty($cubmu)) {
+            //     $cubmuToken = json_decode($cubmu, true);
+            // } else {
                 $tokenPayload = $this->getAccessToken();
             
                 if (empty($tokenPayload['email']) || empty($tokenPayload['sessionId'])) {
@@ -157,7 +157,7 @@ class StreamController extends Controller
                 }
 
                 $cubmuToken = $this->encodeToken($tokenPayload);
-            }
+            // }
         
             $token = $cubmuToken ?? '';
         
