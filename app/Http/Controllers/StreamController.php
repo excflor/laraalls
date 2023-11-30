@@ -161,7 +161,7 @@ class StreamController extends Controller
         
             $token = $cubmuToken ?? '';
         
-            return $token;
+            return response()->json($token);
         } catch (\Exception $error) {
             dd($error);
             throw new \Exception($error->getMessage());
