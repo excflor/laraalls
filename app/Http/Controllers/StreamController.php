@@ -163,6 +163,7 @@ class StreamController extends Controller
         
             return $token;
         } catch (\Exception $error) {
+            dd($error);
             throw new \Exception($error->getMessage());
         }
     }
